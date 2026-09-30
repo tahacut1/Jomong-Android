@@ -1,3 +1,4 @@
+import kotlin.math.min
 package com.example.jomongpro
 import android.content.Context
 import android.graphics.*
