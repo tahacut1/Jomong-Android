@@ -2,6 +2,11 @@ name: Build Jomong APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
@@ -18,7 +23,7 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Set up Gradle
+      - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
@@ -29,7 +34,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Jomong-Pro-APK
+          name: Jomong-Clean-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
