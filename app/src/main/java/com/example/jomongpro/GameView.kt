@@ -7,48 +7,26 @@ import kotlin.math.*
 
 class GameView(context: Context) : View(context) {
     private val p=Paint(Paint.ANTI_ALIAS_FLAG)
-    private val title=Paint(Paint.ANTI_ALIAS_FLAG).apply{textSize=48f;typeface=Typeface.DEFAULT_BOLD}
-    private val text=Paint(Paint.ANTI_ALIAS_FLAG).apply{textSize=30f}
-    private var bossHp=500; private var playerHp=100; private var gold=100
-    private var dialogue=true; private var di=0; private var mission=0
-    private var playerX=0f
-    private val lines=arrayOf(
-        "راوی: پس از فتح شهر، آریون به قلعه دشمن نزدیک می‌شود...",
-        "آریون: این بار باید فرمانده دشمن را شکست بدهم.",
-        "نگهبان: ایست! هیچ‌کس بدون اجازه وارد قلعه نمی‌شود!",
-        "آریون: پس راه دیگری برای ورود پیدا می‌کنم.",
-        "راوی: دروازه شکسته می‌شود. فرمانده دشمن وارد میدان می‌شود!"
-    )
+    private val title=Paint(Paint.ANTI_ALIAS_FLAG).apply{textSize=42f;typeface=Typeface.DEFAULT_BOLD}
+    private val txt=Paint(Paint.ANTI_ALIAS_FLAG).apply{textSize=28f}
+    private var px=0f; private var bossHp=600; private var hp=100; private var gold=250
+    private var phase=0; private var dialogue=0; private var showDialogue=true; private var attackTimer=0f; private var bossHitTimer=0f
+    private val story=arrayOf("راوی: شب فرا رسیده و قلعه دشمن در برابر آریون است.","آریون: اینجا پایان راه نیست؛ آغاز نبرد من است.","فرمانده: آریون! اگر می‌خواهی شهر را پس بگیری، از من عبور کن!","راوی: فرمانده وارد میدان می‌شود. آماده نبرد شو!")
     override fun onDraw(c:Canvas){
-        c.drawColor(Color.rgb(125,165,105))
-        p.color=Color.rgb(175,145,95); c.drawRect(0f,height*.48f,width.toFloat(),height.toFloat(),p)
-        p.color=Color.rgb(90,90,98); c.drawRect(width*.32f,height*.08f,width*.68f,height*.48f,p)
-        c.drawRect(width*.22f,height*.16f,width*.30f,height*.48f,p); c.drawRect(width*.70f,height*.16f,width*.78f,height*.48f,p)
-        p.color=Color.rgb(45,45,50); c.drawRect(width*.46f,height*.30f,width*.54f,height*.48f,p)
-        p.color=Color.rgb(125,80,50); c.drawRect(35f,height*.25f,180f,height*.45f,p); c.drawRect(width-180f,height*.25f,width-35f,height*.45f,p)
-        p.color=Color.rgb(45,120,55)
-        for(x in floatArrayOf(70f,220f,width-220f,width-70f)){c.drawCircle(x,height*.42f,48f,p);c.drawRect(x-12,height*.42f,x+12,height*.55f,p)}
-        val py=height*.67f
-        p.color=Color.rgb(35,70,170); c.drawCircle(width*.28f+playerX,py,30f,p); c.drawRect(width*.25f+playerX,py+28,width*.31f+playerX,py+105,p)
-        p.strokeWidth=10f;p.color=Color.LTGRAY;c.drawLine(width*.31f+playerX,py+50,width*.39f+playerX,py+10,p)
-        p.color=Color.rgb(150,35,35);c.drawCircle(width*.72f,py,42f,p);c.drawRect(width*.675f,py+40,width*.765f,py+145,p)
-        p.color=Color.DKGRAY;c.drawLine(width*.675f,py+70,width*.61f,py+20,p)
-        p.color=Color.argb(220,0,0,0);c.drawRect(0f,0f,width.toFloat(),150f,p)
-        title.color=Color.WHITE;c.drawText("جومونگ — مرحله ۱۰",28f,55f,title)
-        text.color=Color.WHITE
-        val m=if(mission==0)"مأموریت: وارد شدن به قلعه" else if(mission==1)"مأموریت: فرمانده قلعه را شکست بده" else "مأموریت کامل شد! +500 طلا"
-        c.drawText(m,28f,100f,text);c.drawText("سلامت آریون: $playerHp    طلا: $gold",28f,138f,text)
-        p.color=Color.DKGRAY;c.drawRect(width-430f,35f,width-30f,70f,p);p.color=Color.RED;c.drawRect(width-430f,35f,width-430f+400f*(bossHp/500f),70f,p)
-        text.color=Color.WHITE;c.drawText("فرمانده: $bossHp/500",width-420f,105f,text)
-        p.color=Color.rgb(165,35,35);c.drawRoundRect(width-230f,height-150f,width-30f,height-40f,25f,25f,p);text.color=Color.WHITE;c.drawText("⚔ حمله",width-195f,height-80f,text)
-        if(dialogue){p.color=Color.argb(235,20,20,25);c.drawRoundRect(35f,height-245f,width-35f,height-35f,25f,25f,p);text.color=Color.WHITE;c.drawText(lines[di],60f,height-170f,text);p.color=Color.rgb(55,110,190);c.drawRoundRect(width-180f,height-95f,width-60f,height-45f,15f,15f,p);text.color=Color.WHITE;c.drawText("ادامه",width-155f,height-60f,text)}
-        invalidate()
+        c.drawColor(Color.rgb(34,48,78)); p.color=Color.rgb(245,220,145);c.drawCircle(width*.82f,height*.18f,48f,p)
+        p.color=Color.rgb(44,75,48);c.drawRect(0f,height*.40f,width.toFloat(),height.toFloat(),p)
+        p.color=Color.rgb(78,80,88);c.drawRect(width*.28f,height*.20f,width*.72f,height*.53f,p);c.drawRect(width*.17f,height*.12f,width*.28f,height*.53f,p);c.drawRect(width*.72f,height*.12f,width*.83f,height*.53f,p)
+        p.color=Color.rgb(25,25,30);c.drawRect(width*.45f,height*.36f,width*.55f,height*.53f,p)
+        val road=Path();road.moveTo(width*.46f,height*.40f);road.lineTo(width*.54f,height*.40f);road.lineTo(width*.86f,height.toFloat());road.lineTo(width*.14f,height.toFloat());road.close();p.color=Color.rgb(125,105,78);c.drawPath(road,p)
+        for(i in 0..5){val x=if(i%2==0)45f+i*30 else width-60f-i*25;val y=height*.50f+(i%3)*55;p.color=Color.rgb(80,48,30);c.drawRect(x-8,y,x+8,y+75,p);p.color=Color.rgb(32,110,52);c.drawCircle(x,y,42f,p)}
+        val x=width*.35f+px;val y=height*.67f;p.color=Color.rgb(28,55,145);c.drawCircle(x,y-55,27f,p);c.drawRoundRect(x-30,y-30,x+30,y+65,15f,15f,p);p.color=Color.rgb(205,205,215);p.strokeWidth=9f;val swing=if(attackTimer>0)70f else 25f;c.drawLine(x+25,y-5,x+25+swing,y-65,p)
+        val bx=width*.66f;val by=height*.57f;val sc=if(bossHitTimer>0)1.08f else 1f;p.color=Color.rgb(120,24,28);c.drawCircle(bx,by-70,45f*sc,p);c.drawRoundRect(bx-48*sc,by-25,bx+48*sc,by+105,18f,18f,p);p.color=Color.rgb(70,70,78);c.drawRect(bx-60,by-5,bx+60,by+18,p)
+        p.color=Color.argb(215,0,0,0);c.drawRect(0f,0f,width.toFloat(),145f,p);title.color=Color.WHITE;c.drawText("جومونگ — فرمانده قلعه",25f,48f,title);txt.color=Color.WHITE
+        val m=if(phase==0)"مأموریت: به فرمانده نزدیک شو" else if(phase==1)"مأموریت: فرمانده را شکست بده" else "پیروزی! قلعه فتح شد";c.drawText(m,25f,88f,txt);c.drawText("آریون: $hp    طلا: $gold",25f,126f,txt)
+        p.color=Color.DKGRAY;c.drawRect(width-430f,25f,width-25f,62f,p);p.color=Color.RED;c.drawRect(width-430f,25f,width-430f+405f*(bossHp/600f),62f,p);txt.color=Color.WHITE;c.drawText("فرمانده $bossHp / 600",width-420f,98f,txt)
+        p.color=Color.argb(190,20,20,20);c.drawCircle(105f,height-115f,75f,p);c.drawRoundRect(width-245f,height-190f,width-35f,height-80f,28f,28f,p);txt.color=Color.WHITE;c.drawText("⚔ حمله",width-205f,height-120f,txt);c.drawText("◀  حرکت  ▶",55f,height-108f,txt)
+        if(showDialogue){p.color=Color.argb(238,15,18,24);c.drawRoundRect(35f,height-265f,width-35f,height-35f,25f,25f,p);txt.color=Color.WHITE;c.drawText(story[dialogue],60f,height-190f,txt);p.color=Color.rgb(45,105,190);c.drawRoundRect(width-185f,height-100f,width-55f,height-50f,15f,15f,p);txt.color=Color.WHITE;c.drawText("ادامه",width-158f,height-65f,txt)}
+        attackTimer=max(0f,attackTimer-.016f);bossHitTimer=max(0f,bossHitTimer-.016f);invalidate()
     }
-    override fun onTouchEvent(e:MotionEvent):Boolean{
-        if(e.action!=MotionEvent.ACTION_DOWN)return true
-        if(dialogue){if(e.y>height-280f){if(di<lines.lastIndex)di++ else{dialogue=false;mission=1}};return true}
-        if(e.x>width-260f&&e.y>height-190f){bossHp=max(0,bossHp-50);if(bossHp==0){mission=2;gold+=500}}
-        else{playerX=(e.x-width*.28f).coerceIn(-width*.22f,width*.22f);if(mission==1&&abs(playerX)>width*.18f)playerHp=max(0,playerHp-5)}
-        return true
-    }
+    override fun onTouchEvent(e:MotionEvent):Boolean{if(e.action!=MotionEvent.ACTION_DOWN)return true;val x=e.x;val y=e.y;if(showDialogue){if(y>height-290f){if(dialogue<story.lastIndex)dialogue++ else{showDialogue=false;phase=1}};return true};if(x>width-270f&&y>height-215f){bossHp=max(0,bossHp-60);attackTimer=.22f;bossHitTimer=.18f;if(bossHp==0){phase=2;gold+=500}}else if(x<width/2){if(x<width*.28f)px-=18f else px+=18f;px=px.coerceIn(-width*.20f,width*.20f)};return true}
 }
